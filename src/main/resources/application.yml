@@ -2,3 +2,7 @@ spring.application.name: occupancy
 
 server:
   port: 8080
+
+logging:
+  level:
+    root: INFO

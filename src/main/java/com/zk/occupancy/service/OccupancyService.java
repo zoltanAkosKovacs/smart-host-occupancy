@@ -36,6 +36,8 @@ public class OccupancyService {
 		int upgrades = Math.min(availablePremiumRooms,
 			economyCandidates.size() - availableEconomyRooms);
 		for (int i = 0; i < upgrades; i++) {
+			log.info("room upgrade for economy candidate with budget: {}",
+				economyCandidates.get(0));
 			premiumRevenue = premiumRevenue.add(economyCandidates.remove(0));
 			availablePremiumRooms--;
 		}
@@ -63,6 +65,8 @@ public class OccupancyService {
 
 		premiumCandidates.sort(Collections.reverseOrder());
 		economyCandidates.sort(Collections.reverseOrder());
+		log.info("premium candidates: {}", premiumCandidates);
+		log.info("economy candidates: {}", economyCandidates);
 	}
 
 	private OccupancyResponse buildResponse(OccupancyRequest request,
@@ -71,7 +75,7 @@ public class OccupancyService {
 		int availableEconomyRooms,
 		BigDecimal economyRevenue) {
 
-		return OccupancyResponse.builder()
+		var response = OccupancyResponse.builder()
 			.usagePremium(request.getPremiumRooms() - availablePremiumRooms)
 
 			.revenuePremium(premiumRevenue.stripTrailingZeros())
@@ -81,6 +85,9 @@ public class OccupancyService {
 			.revenueEconomy(economyRevenue.stripTrailingZeros())
 
 			.build();
+
+		log.info("returning occupancy response: {}", response);
+		return response;
 	}
 
 }

@@ -30,6 +30,8 @@ public class OccupancyController {
 	@Cacheable(value = "occupancyCache", key = "#request.toString()")
 	public ResponseEntity<OccupancyResponse> occupancy(
 		@RequestBody @Validated OccupancyRequest request) {
+		
+		log.info("occupancy endpoint called with request: {}", request);
 		return new ResponseEntity<>(occupancyService.optimizeBooking(request), HttpStatus.OK);
 	}
 }
