@@ -74,11 +74,11 @@ public class OccupancyService {
 		return OccupancyResponse.builder()
 			.usagePremium(request.getPremiumRooms() - availablePremiumRooms)
 
-			.premiumRevenue(premiumRevenue.stripTrailingZeros())
+			.revenuePremium(premiumRevenue.stripTrailingZeros())
 
 			.usageEconomy(request.getEconomyRooms() - availableEconomyRooms)
 
-			.economyRevenue(economyRevenue.stripTrailingZeros())
+			.revenueEconomy(economyRevenue.stripTrailingZeros())
 
 			.build();
 	}

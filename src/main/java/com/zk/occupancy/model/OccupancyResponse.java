@@ -2,17 +2,15 @@ package com.zk.occupancy.model;
 
 import java.math.BigDecimal;
 import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
+import lombok.Getter;
 
-@Data
-@ToString
+@Getter
 @Builder
 public class OccupancyResponse {
 
 	int usagePremium;
-	BigDecimal premiumRevenue;
+	BigDecimal revenuePremium;
 	int usageEconomy;
-	BigDecimal economyRevenue;
+	BigDecimal revenueEconomy;
 
 }
