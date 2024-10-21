@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Build the application using Maven
-./mvnw clean install
+./gradlew build
 
 # Start the application
-java -jar target/*.jar
+java -jar build/libs/occupancy-0.0.3-SNAPSHOT.jar

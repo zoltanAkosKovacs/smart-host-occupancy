@@ -9,15 +9,13 @@
 OR
 
 1. Navigate to project root folder and open cmd
-2. Run "./mvnw clean install" (optionally with -DskipTests)
-3. Run "java -jar ./target/occupancy-0.0.1-SNAPSHOT.jar"
+2. Run "./gradlew build" (optionally with -PskipTests)
+3. Run "java -jar ./build/libs/occupancy-0.0.3-SNAPSHOT.jar"
 4. Application is up and running on localhost:8080
 
 # How to run docker
 
 1. Navigate to project root folder and open cmd
-    1.1 Currently there's an issue with maven wrapper within docker,
-        so you might have to run ".\mvnw clean install" so the jar is copied to docker
 2. Run "docker build -t occupancy ."
 3. Run "docker run -p 8080:8080 occupancy"
 4. Application is up and running on localhost:8080
