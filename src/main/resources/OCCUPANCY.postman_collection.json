@@ -1,0 +1,118 @@
+{
+	"info": {
+		"_postman_id": "4b305e16-a55e-44ed-b661-d1536516423a",
+		"name": "OCCUPANCY",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6224524"
+	},
+	"item": [
+		{
+			"name": "OK",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "        {\r\n            \"premiumRooms\": 3,\r\n            \"economyRooms\": 3,\r\n            \"potentialGuests\": [23, 45, 155, 374, 22, 99.99, 100, 101, 115, 209]\r\n        }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/occupancy",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"occupancy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Premium Rooms - BAD REQUEST",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "        {\r\n            \"premiumRooms\": -1,\r\n            \"economyRooms\": 3,\r\n            \"potentialGuests\": [23, 45, 155, 374, 22, 99.99, 100, 101, 115, 209]\r\n        }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/occupancy",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"occupancy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Economy Rooms - BAD REQUEST",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "        {\r\n            \"premiumRooms\": 1,\r\n            \"economyRooms\": -2,\r\n            \"potentialGuests\": [23, 45, 155, 374, 22, 99.99, 100, 101, 115, 209]\r\n        }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/occupancy",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"occupancy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Potential Guests - BAD REQUEST",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "        {\r\n            \"premiumRooms\": 1,\r\n            \"economyRooms\": 3,\r\n            \"potentialGuests\": []\r\n        }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/occupancy",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"occupancy"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
