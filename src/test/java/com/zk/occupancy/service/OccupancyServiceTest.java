@@ -21,6 +21,19 @@ class OccupancyServiceTest {
 
 	private static List<BigDecimal> potentialGuests;
 
+	@Autowired
+	OccupancyService occupancyService;
+
+	private static Stream<Arguments> provideRoomConfigurations() {
+		return Stream.of(
+			Arguments.of(3, 3, 3, 3, new BigDecimal(738), new BigDecimal("167.99")),
+			Arguments.of(7, 5, 6, 4, new BigDecimal(1054), new BigDecimal("189.99")),
+			Arguments.of(2, 7, 2, 4, new BigDecimal(583), new BigDecimal("189.99")),
+			Arguments.of(0, 0, 0, 0, BigDecimal.ZERO, BigDecimal.ZERO),
+			Arguments.of(10, 0, 10, 0, new BigDecimal("1243.99"), BigDecimal.ZERO)
+		);
+	}
+
 	static {
 		try {
 			ObjectMapper objectMapper = new ObjectMapper();
@@ -31,20 +44,6 @@ class OccupancyServiceTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	@Autowired
-	ObjectMapper objectMapper;
-	@Autowired
-	OccupancyService occupancyService;
-
-	private static Stream<Arguments> provideRoomConfigurations() {
-		return Stream.of(
-			Arguments.of(3, 3, 3, 3, new BigDecimal(738), new BigDecimal("167.99")),
-			Arguments.of(7, 5, 6, 4, new BigDecimal(1054), new BigDecimal("189.99")),
-			Arguments.of(2, 7, 2, 4, new BigDecimal(583), new BigDecimal("189.99")),
-			Arguments.of(0, 0, 0, 0, BigDecimal.ZERO, BigDecimal.ZERO)
-		);
 	}
 
 	@ParameterizedTest
