@@ -11,8 +11,8 @@ import lombok.ToString;
 public class OccupancyResponse {
 
 	int usagePremium;
-	int usageEconomy;
 	BigDecimal premiumRevenue;
+	int usageEconomy;
 	BigDecimal economyRevenue;
 
 }
