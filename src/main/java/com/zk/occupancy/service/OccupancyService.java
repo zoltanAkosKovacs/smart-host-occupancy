@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -24,29 +25,47 @@ public class OccupancyService {
 		var premiumRevenue = BigDecimal.ZERO;
 		var economyRevenue = BigDecimal.ZERO;
 
-		// book premium rooms
+		// fill premium rooms
 		var availablePremiumRooms = request.getPremiumRooms();
-		for (int i = 0; i < premiumCandidates.size() && 0 < availablePremiumRooms; i++) {
-			premiumRevenue = premiumRevenue.add(premiumCandidates.get(i));
-			availablePremiumRooms--;
-		}
+		var premiumAssigned = premiumCandidates.stream()
+			.limit(availablePremiumRooms)
+			.toList();
 
-		// upgrade economy customers if possible and necessary
+		premiumRevenue = premiumRevenue.add(
+			premiumAssigned.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
+		);
+
+		availablePremiumRooms -= premiumAssigned.size();
+
+		// upgrade economy candidates if possible and necessary
 		var availableEconomyRooms = request.getEconomyRooms();
-		int upgrades = Math.min(availablePremiumRooms,
-			economyCandidates.size() - availableEconomyRooms);
-		for (int i = 0; i < upgrades; i++) {
-			log.info("room upgrade for economy candidate with budget: {}",
-				economyCandidates.get(0));
-			premiumRevenue = premiumRevenue.add(economyCandidates.remove(0));
-			availablePremiumRooms--;
-		}
+		var upgrades = Math.min(availablePremiumRooms,
+			Math.max(0, economyCandidates.size() - availableEconomyRooms));
+		var upgradedCandidates = economyCandidates.stream()
+			.limit(upgrades)
+			.toList();
+
+		upgradedCandidates.forEach(candidate ->
+			log.info("Room upgrade for economy candidate with budget: {}", candidate)
+		);
+
+		premiumRevenue = premiumRevenue.add(
+			upgradedCandidates.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
+		);
+
+		economyCandidates.removeAll(upgradedCandidates);
+		availablePremiumRooms -= upgradedCandidates.size();
 
 		// fill economy rooms
-		for (int i = 0; i < economyCandidates.size() && 0 < availableEconomyRooms; i++) {
-			economyRevenue = economyRevenue.add(economyCandidates.get(i));
-			availableEconomyRooms--;
-		}
+		var economyAssigned = economyCandidates.stream()
+			.limit(availableEconomyRooms)
+			.toList();
+
+		economyRevenue = economyRevenue.add(
+			economyAssigned.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
+		);
+
+		availableEconomyRooms -= economyAssigned.size();
 
 		return buildResponse(request, availablePremiumRooms, premiumRevenue, availableEconomyRooms,
 			economyRevenue);
@@ -55,16 +74,17 @@ public class OccupancyService {
 	private void sortBudgets(OccupancyRequest request, List<BigDecimal> premiumCandidates,
 		List<BigDecimal> economyCandidates) {
 		var guestBudgets = request.getPotentialGuests();
-		for (var budget : guestBudgets) {
-			if (budget.compareTo(PREMIUM_THRESHOLD) >= 0) {
-				premiumCandidates.add(budget);
-			} else if (budget.compareTo(BigDecimal.ZERO) > 0) {
-				economyCandidates.add(budget);
-			}
-		}
+
+		var partitionedGuests = guestBudgets.stream()
+			.filter(budget -> budget.compareTo(BigDecimal.ZERO) > 0)
+			.collect(Collectors.partitioningBy(budget -> budget.compareTo(PREMIUM_THRESHOLD) >= 0));
+
+		premiumCandidates.addAll(partitionedGuests.get(true));
+		economyCandidates.addAll(partitionedGuests.get(false));
 
 		premiumCandidates.sort(Collections.reverseOrder());
 		economyCandidates.sort(Collections.reverseOrder());
+
 		log.info("premium candidates: {}", premiumCandidates);
 		log.info("economy candidates: {}", economyCandidates);
 	}
@@ -77,13 +97,9 @@ public class OccupancyService {
 
 		var response = OccupancyResponse.builder()
 			.usagePremium(request.getPremiumRooms() - availablePremiumRooms)
-
 			.revenuePremium(premiumRevenue.stripTrailingZeros())
-
 			.usageEconomy(request.getEconomyRooms() - availableEconomyRooms)
-
 			.revenueEconomy(economyRevenue.stripTrailingZeros())
-
 			.build();
 
 		log.info("returning occupancy response: {}", response);
