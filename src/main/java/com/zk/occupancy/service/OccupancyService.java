@@ -3,7 +3,6 @@ package com.zk.occupancy.service;
 import com.zk.occupancy.model.OccupancyRequest;
 import com.zk.occupancy.model.OccupancyResponse;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,13 +32,12 @@ public class OccupancyService {
 		}
 
 		// upgrade economy customers if possible and necessary
-		int upgrades = Math.min(availablePremiumRooms, economyCandidates.size());
 		var availableEconomyRooms = request.getEconomyRooms();
-		if (economyCandidates.size() > availableEconomyRooms) {
-			for (int i = 0; i < upgrades; i++) {
-				premiumRevenue = premiumRevenue.add(economyCandidates.remove(0));
-				availablePremiumRooms--;
-			}
+		int upgrades = Math.min(availablePremiumRooms,
+			economyCandidates.size() - availableEconomyRooms);
+		for (int i = 0; i < upgrades; i++) {
+			premiumRevenue = premiumRevenue.add(economyCandidates.remove(0));
+			availablePremiumRooms--;
 		}
 
 		// fill economy rooms
@@ -58,7 +56,7 @@ public class OccupancyService {
 		for (var budget : guestBudgets) {
 			if (budget.compareTo(PREMIUM_THRESHOLD) >= 0) {
 				premiumCandidates.add(budget);
-			} else {
+			} else if (budget.compareTo(BigDecimal.ZERO) > 0) {
 				economyCandidates.add(budget);
 			}
 		}
@@ -67,20 +65,21 @@ public class OccupancyService {
 		economyCandidates.sort(Collections.reverseOrder());
 	}
 
-	private OccupancyResponse buildResponse(OccupancyRequest request, int availablePremiumRooms,
+	private OccupancyResponse buildResponse(OccupancyRequest request,
+		int availablePremiumRooms,
 		BigDecimal premiumRevenue,
-		int availableEconomyRooms, BigDecimal economyRevenue) {
+		int availableEconomyRooms,
+		BigDecimal economyRevenue) {
+
 		return OccupancyResponse.builder()
 			.usagePremium(request.getPremiumRooms() - availablePremiumRooms)
 
-			.premiumRevenue(premiumRevenue.setScale(2,
-				RoundingMode.HALF_UP).stripTrailingZeros())
+			.premiumRevenue(premiumRevenue.stripTrailingZeros())
 
 			.usageEconomy(request.getEconomyRooms() - availableEconomyRooms)
 
-			.economyRevenue(economyRevenue.setScale(2,
-				RoundingMode.HALF_UP).stripTrailingZeros())
-			
+			.economyRevenue(economyRevenue.stripTrailingZeros())
+
 			.build();
 	}
 
