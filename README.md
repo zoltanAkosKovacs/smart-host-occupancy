@@ -1,5 +1,8 @@
 # Getting Started
 
+# MAVEN VERSION
+For **GRADLE** checkout feature/gradle branch
+
 # How to run locally
 
 1. Navigate to project root folder and open cmd
@@ -10,7 +13,7 @@ OR
 
 1. Navigate to project root folder and open cmd
 2. Run "./mvnw clean install" (optionally with -DskipTests)
-3. Run "java -jar ./target/occupancy-0.0.1-SNAPSHOT.jar"
+3. Run "java -jar ./target/occupancy-0.0.3-SNAPSHOT.jar"
 4. Application is up and running on localhost:8080
 
 # How to run docker
