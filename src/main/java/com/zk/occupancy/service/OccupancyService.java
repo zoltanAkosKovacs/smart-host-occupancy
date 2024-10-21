@@ -17,88 +17,85 @@ public class OccupancyService {
 	public static final BigDecimal PREMIUM_THRESHOLD = new BigDecimal("100");
 
 	public OccupancyResponse optimizeBooking(OccupancyRequest request) {
-		List<BigDecimal> premiumCandidates = new ArrayList<>();
-		List<BigDecimal> economyCandidates = new ArrayList<>();
+		List<BigDecimal> premiumBudgets = new ArrayList<>();
+		List<BigDecimal> economyBudgets = new ArrayList<>();
 
-		sortBudgets(request, premiumCandidates, economyCandidates);
+		sortBudgets(request, premiumBudgets, economyBudgets);
 
 		var premiumRevenue = BigDecimal.ZERO;
 		var economyRevenue = BigDecimal.ZERO;
 
 		// fill premium rooms
-		var availablePremiumRooms = request.getPremiumRooms();
-		var premiumAssigned = premiumCandidates.stream()
-			.limit(availablePremiumRooms)
+		var remainingPremiumRooms = request.getPremiumRooms();
+		var assignedPremiumRooms = premiumBudgets.stream()
+			.limit(remainingPremiumRooms)
 			.toList();
 
-		premiumRevenue = premiumRevenue.add(
-			premiumAssigned.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
-		);
+		for (var price : assignedPremiumRooms) {
+			premiumRevenue = premiumRevenue.add(price);
+		}
 
-		availablePremiumRooms -= premiumAssigned.size();
+		remainingPremiumRooms -= assignedPremiumRooms.size();
 
-		// upgrade economy candidates if possible and necessary
-		var availableEconomyRooms = request.getEconomyRooms();
-		var upgrades = Math.min(availablePremiumRooms,
-			Math.max(0, economyCandidates.size() - availableEconomyRooms));
-		var upgradedCandidates = economyCandidates.stream()
-			.limit(upgrades)
+		// upgrade economy to premium if possible and necessary
+		var remainingEconomyRooms = request.getEconomyRooms();
+		var upgrades = Math.min(remainingPremiumRooms,
+			economyBudgets.size() - remainingEconomyRooms);
+		var upgradedPremiumRooms = economyBudgets.stream()
+			.limit(Math.max(upgrades, 0))
 			.toList();
 
-		upgradedCandidates.forEach(candidate ->
-			log.info("Room upgrade for economy candidate with budget: {}", candidate)
-		);
+		for (var price : upgradedPremiumRooms) {
+			log.info("Room upgrade guest paying: {}", price);
+			premiumRevenue = premiumRevenue.add(price);
+		}
 
-		premiumRevenue = premiumRevenue.add(
-			upgradedCandidates.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
-		);
-
-		economyCandidates.removeAll(upgradedCandidates);
-		availablePremiumRooms -= upgradedCandidates.size();
+		economyBudgets.removeAll(upgradedPremiumRooms);
+		remainingPremiumRooms -= upgradedPremiumRooms.size();
 
 		// fill economy rooms
-		var economyAssigned = economyCandidates.stream()
-			.limit(availableEconomyRooms)
+		var assignedEconomyRooms = economyBudgets.stream()
+			.limit(remainingEconomyRooms)
 			.toList();
 
-		economyRevenue = economyRevenue.add(
-			economyAssigned.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
-		);
+		for (var price : assignedEconomyRooms) {
+			economyRevenue = economyRevenue.add(price);
+		}
 
-		availableEconomyRooms -= economyAssigned.size();
+		remainingEconomyRooms -= assignedEconomyRooms.size();
 
-		return buildResponse(request, availablePremiumRooms, premiumRevenue, availableEconomyRooms,
+		return buildResponse(request, remainingPremiumRooms, premiumRevenue, remainingEconomyRooms,
 			economyRevenue);
 	}
 
-	private void sortBudgets(OccupancyRequest request, List<BigDecimal> premiumCandidates,
-		List<BigDecimal> economyCandidates) {
+	private void sortBudgets(OccupancyRequest request, List<BigDecimal> premiumBudgets,
+		List<BigDecimal> economyBudgets) {
 		var guestBudgets = request.getPotentialGuests();
 
-		var partitionedGuests = guestBudgets.stream()
+		var partitionedBudgets = guestBudgets.stream()
 			.filter(budget -> budget.compareTo(BigDecimal.ZERO) > 0)
 			.collect(Collectors.partitioningBy(budget -> budget.compareTo(PREMIUM_THRESHOLD) >= 0));
 
-		premiumCandidates.addAll(partitionedGuests.get(true));
-		economyCandidates.addAll(partitionedGuests.get(false));
+		premiumBudgets.addAll(partitionedBudgets.get(true));
+		economyBudgets.addAll(partitionedBudgets.get(false));
 
-		premiumCandidates.sort(Collections.reverseOrder());
-		economyCandidates.sort(Collections.reverseOrder());
+		premiumBudgets.sort(Collections.reverseOrder());
+		economyBudgets.sort(Collections.reverseOrder());
 
-		log.info("premium candidates: {}", premiumCandidates);
-		log.info("economy candidates: {}", economyCandidates);
+		log.info("premium budgets: {}", premiumBudgets);
+		log.info("economy budgets: {}", economyBudgets);
 	}
 
 	private OccupancyResponse buildResponse(OccupancyRequest request,
-		int availablePremiumRooms,
+		int remainingPremiumRooms,
 		BigDecimal premiumRevenue,
-		int availableEconomyRooms,
+		int remainingEconomyRooms,
 		BigDecimal economyRevenue) {
 
 		var response = OccupancyResponse.builder()
-			.usagePremium(request.getPremiumRooms() - availablePremiumRooms)
+			.usagePremium(request.getPremiumRooms() - remainingPremiumRooms)
 			.revenuePremium(premiumRevenue.stripTrailingZeros())
-			.usageEconomy(request.getEconomyRooms() - availableEconomyRooms)
+			.usageEconomy(request.getEconomyRooms() - remainingEconomyRooms)
 			.revenueEconomy(economyRevenue.stripTrailingZeros())
 			.build();
 

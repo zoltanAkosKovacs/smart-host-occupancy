@@ -25,7 +25,7 @@ public class OccupancyRequest {
 	int economyRooms;
 
 	@NotNull(message = "potentialGuests cannot be null")
-	@Size(min = 1, message = "potentialGuests must have at least one element")
+	@Size(min = 1, message = "potentialGuests must have at least one element - what a bad day to own a hotel")
 	List<BigDecimal> potentialGuests;
 
 }
