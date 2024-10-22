@@ -1,5 +1,8 @@
 # Getting Started
 
+# GRADLE VERSION
+For **MAVEN** checkout main branch
+
 # How to run locally
 
 1. Navigate to project root folder and open cmd
