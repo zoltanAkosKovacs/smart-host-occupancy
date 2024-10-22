@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Build the application using Maven
 ./mvnw clean install
