@@ -1,4 +1,5 @@
 #smarthost #smart #host #recruitment #process #tomasz.kolaszynski #tomasz.kolaszynski@beusable.pl #smart #host #tomasz #kolaszynski #beusable 
+
 SmartHost recruitment process task. I didn't receive ANY answer from them, not even a simple "no", or "thanks for taking the time".
 
 # Getting Started
